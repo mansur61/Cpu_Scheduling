@@ -74,19 +74,35 @@ int main()
     }
 
     int model_sec;
+    cout << "1) First Come First Served\n" << "2)  Shortest Job First – Non-Preemptive\n" << "3) Shortest Job First –Preemptive\n"
+        << "4) Priority Scheduling – Non-Preemptive\n" << "5) Priority Scheduling –Preemptive \n" << "6)  Round Robin Scheduling – time_quantum=2\n\n";
+
     cout << "Kullanmak istediðin Cpu Scheduling Modelini seçniz\n";
     cin >> model_sec;
 
-    cout << "1) First Come First Served\n" << "2)  Shortest Job First – Non-Preemptive\n" << "3) Shortest Job First –Preemptive\n"
-        << "4) Priority Scheduling – Non-Preemptive\n" << "5) Priority Scheduling –Preemptive \n" << "6)  Round Robin Scheduling – time_quantum=2\n";
-
+   
     if (model_sec == 1) {
         cout << "Scheduling Method: First Come First Served.\n";
         cout << "Process Waiting Times:\n";
+        int i,toplam_cpu_burst=0,waiting_time=0,toplam_wait=0,wait=0;
 
-        // Kodlarý buraya yazýnýz
+        for (i = 0; i < 5; i++)
+        {
+            waiting_time = process_gelis[i][0];
+            if (waiting_time == 0) {
+                wait = waiting_time;
+                cout << "P" << (i + 1) << ": "<<waiting_time << " ms" << endl;
+            }
+            else {
+                wait = toplam_cpu_burst - waiting_time;
+                cout << "P" << (i + 1) << ": "<<(wait) << " ms" << endl;
+            }
+            toplam_cpu_burst += cpu_burst[i][0];
 
-        cout << "Average Waiting Time: \n";
+            toplam_wait += wait;
+        }
+
+        cout << "Average Waiting Time: "<< (toplam_wait/5) <<" ms" <<endl;
     }
 
 
