@@ -9,6 +9,8 @@
 #include <cstdlib> 
 using namespace std;
 
+//void cpu_scheduling_preliminary(int i, int cpu_burst[5][1], int process_gelis[5][1], int process_oncelik[5][1], int  fileDiziSayi[5][3]);
+
 int main()
 {
     setlocale(LC_ALL, "Turkish");
@@ -24,7 +26,7 @@ int main()
    
     char karater;
 
-    int satir_idx = 0, stn_idx = 0, ikinokta_syc = 0,b;
+    int satir_idx = 0, stn_idx = 0, ikinokta_syc = 0;
 
     if (file) {
       
@@ -50,10 +52,13 @@ int main()
                 }
             }
       }
-        int i=0,j;
+
+     //cpu_scheduling_preliminary(0, cpu_burst, process_gelis, process_oncelik, fileDiziSayi);
+
+        int i = 0,j;
         while (i < 3) {
 
-            for ( j = 0; j < 5; j++)
+            for (j = 0; j < 5; j++)
             {
                 if (i == 0) {
                     cpu_burst[j][0] = fileDiziSayi[j][i];
@@ -67,7 +72,7 @@ int main()
             }
             i++;
         }
-
+      
     }
     else {
         cout << "Dosya açýlamadý"<<endl;
@@ -105,7 +110,94 @@ int main()
         cout << "Average Waiting Time: "<< (toplam_wait/5) <<" ms" <<endl;
     }
 
+    else if (model_sec == 2) {
+
+        cout << "Scheduling Method: Shortest Job First – Non-Preemptive.\n";
+        cout << "Process Waiting Times:\n";
+        int i, toplam_cpu_burst = 0, waiting_time = 0, toplam_wait = 0, wait = 0,j,m;
+
+        for (i = 0; i < 5; i++)
+        {
+            waiting_time = process_gelis[i][0];
+            if (waiting_time == 0) {
+                wait = waiting_time;
+                cout << "P" << (i + 1) << ": " << waiting_time << " ms" << endl;
+            }
+            else {
+                
+                    int currentProcessArrivalTime = process_gelis[i][0];
+                    for (m = i+1; m < 5; m++)
+                    {
+                        if (cpu_burst[i][0] > cpu_burst[m][0]) {
+                            //cpu_burst için deðiþim
+                            int cpuTut = cpu_burst[i][0];
+                            cpu_burst[i][0] = cpu_burst[m][0];
+                            cpu_burst[m][0] = cpuTut;
+                            //process_gelis için deðiþim
+                            int processGelisTut = process_gelis[i][0];
+                            process_gelis[i][0] = process_gelis[m][0];
+                            process_gelis[m][0] = processGelisTut;
+
+
+                            toplam_cpu_burst += cpu_burst[i][0];
+                            wait = toplam_cpu_burst - currentProcessArrivalTime;
+                            toplam_wait += wait;
+                        }
+                       
+                    }
+                    cout << "P" << (i + 1) << ": " << (toplam_cpu_burst - currentProcessArrivalTime) << " ms" << endl;
+
+
+                    // Sýralama sonrasý ilgili sýralamayý eski haline getir, diðer processler etkilenmesin, aþaðýdaki döngüye fonksiyon yazýlacak
+                    int i = 0;
+                    while (i < 3) {
+
+                        for (j = 0; j < 5; j++)
+                        {
+                            if (i == 0) {
+                                cpu_burst[j][0] = fileDiziSayi[j][i];
+                            }
+                            else if (i == 1) {
+                                process_gelis[j][0] = fileDiziSayi[j][i];
+                            }
+                            else {
+                                process_oncelik[j][0] = fileDiziSayi[j][i];
+                            }
+                        }
+                        i++;
+                    }
+            }
+            toplam_cpu_burst += cpu_burst[i][0];
+        }
+
+        cout << "Average Waiting Time: "<< (toplam_wait/5)<<" ms"<< endl;
+
+    }
+
 
 
     return 0;
 }
+/*
+void  cpu_scheduling_preliminary(int i, int cpu_burst[5][1], int process_gelis[5][1], int process_oncelik[5][1], int  fileDiziSayi[5][3]) {
+ 
+    int j;
+        while (i < 3) {
+
+            for (j = 0; j < 5; j++)
+            {
+                if (i == 0) {
+                    cpu_burst[j][0] = fileDiziSayi[j][i];
+                }
+                else if (i == 1) {
+                    process_gelis[j][0] = fileDiziSayi[j][i];
+                }
+                else {
+                    process_oncelik[j][0] = fileDiziSayi[j][i];
+                }
+            }
+            i++;
+        }
+        int b = 0;
+}
+*/
