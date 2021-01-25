@@ -1,5 +1,3 @@
-// Cpu_Scheduling.cpp : This file contains the 'main' function. Program execution begins and ends there.
-//
 
 #include <iostream>
 #include <locale.h>
@@ -309,6 +307,78 @@ void priority(int cpu_burst[5][1], int process_gelis[5][1], int process_oncelik[
 
     std::cout << "Average Waiting Time: " << (toplam_wait / 5) << " ms" << endl;
 }
+void roundRobin(int cpu_burst[5][1], int process_gelis[5][1], int process_oncelik[5][1], int  fileDiziSayi[5][3]) {
+
+    std::cout << "Scheduling Method: Round Robin Scheduling \n";
+    int time_quantum;
+    std::cout << "time_quantum deðerini giriniz ";
+    std::cin >> time_quantum;
+    std::cout << endl;
+    std::cout << "Process Waiting Times:\n";
+    int i, toplam_cpu_burst = 0, waiting_time = 0, wait = 0, j, m, k, durumSayac = 0;
+    float toplam_wait = 0.0;
+    bool durum = true;
+    for (i = 0; i < 5; i++)
+    {
+        int b = 0;
+        while (durum) {
+
+            for (j = 0; j < 5; j++)
+            {
+                if (i == j) {
+                    if (cpu_burst[i][0] != 0) {
+                        cpu_burst[i][0] = cpu_burst[i][0] - time_quantum;
+                        if (cpu_burst[i][0] < 0 || cpu_burst[i][0] == 0) {
+                            cpu_burst[i][0] = 0;
+                            durum = false;
+                            break;
+                        }
+
+                    }
+                    continue;
+                }
+                if (cpu_burst[j][0] != 0) {
+                    cpu_burst[j][0] = cpu_burst[j][0] - time_quantum;
+                    if (cpu_burst[j][0] < 0) {
+
+                        wait = wait - (time_quantum + cpu_burst[j][0]);
+                        cpu_burst[j][0] = 0;
+                    }
+                    wait += time_quantum;
+                }
+
+            }
+
+            for (k = 1; k < 5; k++)
+            {
+                if (cpu_burst[i][0] != 0) {
+                    durumSayac = 1;
+                }
+                else {
+                    durumSayac = 0;
+                }
+                if (cpu_burst[k][0] == 0 && durumSayac == 0) {
+                    durum = false;
+                }
+
+
+            }
+
+        }
+        std::cout << "P" << (i + 1) << ": " << (wait - process_gelis[i][0]) << " ms" << endl;
+        wait = (wait - process_gelis[i][0]);
+        toplam_wait += wait;
+       
+        wait = 0;
+        durum = true;
+        cpu_scheduling_preliminary(0, cpu_burst, process_gelis, process_oncelik, fileDiziSayi);
+    }
+
+    std::cout << "Average Waiting Time: " << (toplam_wait / 5) << " ms" << endl;
+
+  
+}
+
 int main()
 {
     setlocale(LC_ALL, "Turkish");
@@ -316,24 +386,53 @@ int main()
     ifstream file;
     file.open("file_input.txt");
 
-  
+
     int  fileDiziSayi[5][3] = { {0,0,0}, {0,0,0} ,{0,0,0} ,{0,0,0} ,{0,0,0} };
     int cpu_burst[5][1] = { {0}, {0} ,{0} ,{0} ,{0} };
     int process_gelis[5][1] = { {0}, {0} ,{0} ,{0} ,{0} };
     int process_oncelik[5][1] = { {0}, {0} ,{0} ,{0} ,{0} };
-   
-    char karater;
 
+    char karater;
+    string yazi;
     int satir_idx = 0, stn_idx = 0, ikinokta_syc = 0;
 
     if (file) {
-      
+
+        /*
+        * Bu Yapý V11 alt sürümlerinde sorunsuz çalýþan yapýdýr.
+        while (file.get(karater)) {
+            if (karater != '\n') {
+                if (karater != ':') {
+                    int val = karater - 48;
+                    if (val <= 9 && val >= 0)
+                    {
+                        fileDiziSayi[satir_idx][stn_idx] = val;//stoi(s1);
+                        stn_idx++;
+                    }
+                    else
+                        continue;
+                }
+                else {
+                    ikinokta_syc++;
+                }
+                if (ikinokta_syc == 2) {
+                    ikinokta_syc = 0;
+                }
+                if (stn_idx > 2) {
+                    stn_idx = 0;
+                }
+                if (ikinokta_syc == 0 && stn_idx == 0) {
+                    satir_idx++;
+                }
+            }
+        }
+        */
         while (file.get(karater)) {
             if (karater != '\n') {
                 if (karater != ':') {
 
-                   string s1{ karater };                 
-                   fileDiziSayi[satir_idx][stn_idx] = stoi(s1);          
+                    string s1{ karater }; //V11 sürümünü gerektirir. Düþük sürümlerde yukarýdaki döngüyü baz alabilirsiniz.
+                    fileDiziSayi[satir_idx][stn_idx] = stoi(s1);
                     stn_idx++;
                 }
                 else {
@@ -349,72 +448,74 @@ int main()
                     satir_idx++;
                 }
             }
-      }
+        }
 
-     cpu_scheduling_preliminary(0, cpu_burst, process_gelis, process_oncelik, fileDiziSayi);
-    
+        cpu_scheduling_preliminary(0, cpu_burst, process_gelis, process_oncelik, fileDiziSayi);
+
     }
     else {
-        std::cout << "Dosya açýlamadý"<<endl;
+        std::cout << "Dosya açýlamadý" << endl;
     }
 
 
-    int model_sec = 0,option;
+    int model_sec = 0, option;
 
-    cout << "CPU Scheduler Simulator"<<endl;
+    cout << "CPU Scheduler Simulator" << endl;
     std::cout << "1) Scheduling Method\n" << "2)  Preemptive Mode\n" << "3) Non-preemptive Mode\n"
-        << "4) Show Result\n" << "5) End Program \n"<<endl;
+        << "4) Show Result\n" << "5) End Program \n" << endl;
     cout << "Option >" << endl;
     cin >> option;
     cout << endl;
     switch (option)
     {
 
-     case 1:      
-         std::cout << "1) First Come First Served\n" << "2)  Shortest Job First – Non-Preemptive\n" << "3) Shortest Job First –Preemptive\n"
-             << "4) Priority Scheduling – Non-Preemptive\n" << "5) Priority Scheduling –Preemptive \n" << "6)  Round Robin Scheduling – time_quantum=2\n\n";
-         std::cin >> model_sec;
+    case 1:
+        std::cout << "1) First Come First Served\n" << "2)  Shortest Job First – Non-Preemptive\n" << "3) Shortest Job First –Preemptive\n"
+            << "4) Priority Scheduling – Non-Preemptive\n" << "5) Priority Scheduling –Preemptive \n" << "6)  Round Robin Scheduling – time_quantum=2\n\n";
+        std::cin >> model_sec;
         break;
-     case 2:
+    case 2:
+        cout << "Preemptive Mode " <<endl;
+        
+        break;
 
-         cout << "Preemptive Mode: This is a clock-driven mode, in which the clock is a counter that is incremented each simulated second.The clock is "<<
-             "initially 0, and continues 'ticking' until all the jobs in the input have "<<
-            " been serviced and left the system.This simulation runs until a " <<
-             "particular number of jobs have been serviced.First jobs should obtain "<<
-            " from input file.And each step simulator ask user if its need to put new "<<
-            " job to ready queue or Continue to execution.New job should be added "<<
-            " in pair format.Pair should consist Burst time and Priority(10:1).This "<<
-            " job should be taking into account by your program. "<<endl;
-         break;
+    case 3:
+        cout << "Non-preemptive Mode" << endl;
+        fcfs(process_gelis, cpu_burst);
+        cout << endl;
+        sjf(cpu_burst, process_gelis, process_oncelik, fileDiziSayi);
+        cout << endl;
+        priority(cpu_burst, process_gelis, process_oncelik, fileDiziSayi);
+        cout << endl;
+        roundRobin(cpu_burst, process_gelis, process_oncelik, fileDiziSayi);
+        break;
 
-     case 3:
+    case 4:
+        fcfs(process_gelis, cpu_burst);
+        cout << endl;
+        sjf(cpu_burst, process_gelis, process_oncelik, fileDiziSayi);
+        cout << endl;
+        priority(cpu_burst, process_gelis, process_oncelik, fileDiziSayi);
+        cout << endl;
+        roundRobin(cpu_burst, process_gelis, process_oncelik, fileDiziSayi);
+        break;
 
-         cout << "Non-preemptive Mode: This mode is similar to Step-by-Step mode but " <<
-             "its difference is simulator don’t ask to user at each time tick for new " <<
-             " job.Simulator should use input file for decision process" << endl;
-         break;
-
-     case 4:
-         fcfs(process_gelis, cpu_burst);
-         cout <<  endl;
-         sjf(cpu_burst, process_gelis, process_oncelik, fileDiziSayi);
-         cout << endl;
-         priority(cpu_burst, process_gelis, process_oncelik, fileDiziSayi);
-         cout << endl;
-         break;
-
-     case 5:
-         cout << " End Program: If user chooses this option, program show report to user " <<
-             " (As described Step 4) and write output file that given with ' - o' option " <<
-             " and terminated." << endl;
-         break;
+    case 5:
+        cout << "End Progrom :\n" << "Ýlgili programý Unix|Linux türevlerinde çalýþtýrmak için:\n g++ Cpu_Scheduling.cpp diyerek çalýþtýrýnýz. Sonra; \n Oluþturulacak"<<
+            " olan a.out çalýþtýrýlabilir dosyayý ./a.out diyerek ilgili .cpp uzantýlý dosyayý derleyip çalýþtýrabilirsiniz."<<endl;
+        /*
+        cout << " End Program: If user chooses this option, program show report to user " <<
+            " (As described Step 4) and write output file that given with ' - o' option " <<
+            " and terminated." << endl;
+        */
+        break;
     default:
         cout << "Seçim Yapýnýz " << endl;
         break;
     }
 
     // Ayrý ayrý göstermek istendiðinde kullanýnýz.
-    if (model_sec == 1) {      
+    if (model_sec == 1) {
         fcfs(process_gelis, cpu_burst);
     }
     else if (model_sec == 2) {
@@ -425,16 +526,16 @@ int main()
     }
     else if (model_sec == 4) {
         priority(cpu_burst, process_gelis, process_oncelik, fileDiziSayi);
-        
+
     }
     else if (model_sec == 5) {
         std::cout << "Scheduling Method: Priority Scheduling –Preemptive, kodlanmadý" << endl;
     }
     else if (model_sec == 6) {
 
-        std::cout << "Scheduling Method: Round Robin Scheduling,kodlanmadý \n";
-       
+        roundRobin(cpu_burst, process_gelis, process_oncelik, fileDiziSayi);
     }
     return 0;
 }
+
  
